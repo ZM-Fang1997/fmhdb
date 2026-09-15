@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>食药物质功能食品组分结构与组方设计研发系统</title>
+<style>
+:root {
+  --primary: #1565c0; --primary-dark: #0d47a1; --primary-light: #e3f2fd;
+  --secondary: #00838f; --accent: #ff8f00; --success: #2e7d32; --danger: #c62828;
+  --bg: #f5f7fa; --card-bg: #ffffff; --text: #212529; --text-muted: #6c757d;
+  --border: #dee2e6; --shadow: 0 2px 12px rgba(0,0,0,0.08); --shadow-hover: 0 8px 24px rgba(0,0,0,0.12);
+  --radius: 12px; --radius-sm: 8px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh;
+  display: flex; flex-direction: column; padding-bottom: calc(64px + var(--safe-bottom));
+}
+a { color: var(--primary); text-decoration: none; }
+img { max-width: 100%; height: auto; display: block; }
+
+.site-header {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); position: sticky; top: 0; z-index: 1000;
+}
+.header-top {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 16px; max-width: 1400px; margin: 0 auto; width: 100%;
+}
+.brand { display: flex; flex-direction: column; }
+.brand h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: 0.5px; line-height: 1.3; }
+.brand .subtitle { font-size: 0.6rem; opacity: 0.85; font-weight: 300; letter-spacing: 0.3px; }
+.auth-buttons { display: flex; gap: 8px; align-items: center; }
+.user-info { font-size: 0.8rem; color: rgba(255,255,255,0.9); display: flex; align-items: center; gap: 8px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 10px 18px; border-radius: var(--radius-sm); border: none;
+  font-size: 0.95rem; cursor: pointer; transition: all 0.2s; font-weight: 500;
+  min-height: 44px; min-width: 44px;
+}
+.btn-sm { padding: 8px 14px; font-size: 0.85rem; }
+.btn-xs { padding: 6px 10px; font-size: 0.75rem; }
+.btn-outline { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.5); }
+.btn-outline:hover { background: rgba(255,255,255,0.15); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #e65100; }
+.btn-secondary { background: var(--secondary); color: #fff; }
+.btn-secondary:hover { background: #006064; }
+.btn-light { background: #fff; color: var(--primary); border: 1px solid var(--border); }
+.btn-light:hover { background: var(--primary-light); }
+
+.nav-bar { background: rgba(0,0,0,0.12); display: none; }
+.nav-bar ul {
+  display: flex; list-style: none; max-width: 1400px; margin: 0 auto;
+  padding: 0 16px; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.nav-bar a {
+  display: block; padding: 10px 14px; color: rgba(255,255,255,0.9);
+  font-size: 0.85rem; border-bottom: 3px solid transparent;
+  transition: all 0.2s; white-space: nowrap;
+}
+.nav-bar a:hover, .nav-bar a.active { color: #fff; border-bottom-color: var(--accent); background: rgba(255,255,255,0.08); }
+
+.mobile-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; background: #fff;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.08); z-index: 1001;
+  display: flex; justify-content: space-around; padding-bottom: var(--safe-bottom);
+  border-top: 1px solid var(--border);
+}
+.mobile-nav button {
+  flex: 1; background: none; border: none; padding: 8px 0 6px;
+  font-size: 0.65rem; color: var(--text-muted); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-height: 56px; transition: all 0.2s;
+}
+.mobile-nav button .icon { font-size: 1.3rem; line-height: 1; }
+.mobile-nav button.active { color: var(--primary); font-weight: 600; }
+
+main { flex: 1; max-width: 1400px; width: 100%; margin: 0 auto; padding: 16px; }
+.page-section { display: none; animation: fadeIn 0.3s ease; }
+.page-section.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.page-title {
+  font-size: 1.4rem; font-weight: 700; color: var(--primary-dark);
+  margin-bottom: 6px; display: flex; align-items: center; gap: 10px;
+}
+.page-title .icon {
+  width: 36px; height: 36px; background: var(--primary-light);
+  border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+}
+.page-desc { color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem; }
+
+.hero {
+  text-align: center; padding: 40px 16px 28px;
+  background: linear-gradient(180deg, var(--primary-light) 0%, var(--bg) 100%);
+  border-radius: var(--radius); margin-bottom: 24px;
+}
+.hero h2 { font-size: 1.5rem; color: var(--primary-dark); margin-bottom: 10px; }
+.hero p { font-size: 0.95rem; color: var(--text-muted); max-width: 640px; margin: 0 auto 18px; }
+
+.modules-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
+.module-card {
+  background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 24px 20px; text-align: center; transition: all 0.25s;
+  border: 1px solid var(--border); cursor: pointer; position: relative; overflow: hidden;
+}
+.module-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: var(--primary); opacity: 0; transition: opacity 0.25s;
+}
+.module-card:hover, .module-card:active { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+.module-card:hover::before { opacity: 1; }
+.module-card .card-icon {
+  width: 56px; height: 56px; margin: 0 auto 12px; background: var(--primary-light);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+}
+.module-card h3 { font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 6px; }
+.module-card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+.module-card .card-arrow { margin-top: 12px; font-size: 1.2rem; color: var(--primary); }
+
+.stats-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--card-bg); border-radius: var(--radius); padding: 16px;
+  box-shadow: var(--shadow); border-left: 4px solid var(--primary);
+}
+.stat-card .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+.stat-card .stat-value { font-size: 1.3rem; font-weight: 700; color: var(--primary-dark); margin-top: 2px; }
+
+.search-box {
+  display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.search-box input {
+  flex: 1; min-width: 0; padding: 12px 14px; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 1rem; -webkit-appearance: none;
+}
+.search-box input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(21,101,192,0.1); }
+
+.substance-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.substance-card {
+  background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow);
+  overflow: hidden; transition: all 0.25s; border: 1px solid var(--border); cursor: pointer;
+}
+.substance-card:active { transform: scale(0.97); }
+.substance-card img { width: 100%; height: 100px; object-fit: cover; background: var(--primary-light); }
+.substance-card .name {
+  padding: 8px; text-align: center; font-weight: 600; font-size: 0.85rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.substance-card .meta { font-size: 0.7rem; color: var(--text-muted); text-align: center; padding-bottom: 8px; }
+
+.pagination {
+  display: flex; justify-content: center; align-items: center; gap: 6px;
+  margin-top: 24px; flex-wrap: wrap;
+}
+.pagination button {
+  padding: 8px 12px; border: 1px solid var(--border); background: #fff;
+  border-radius: var(--radius-sm); cursor: pointer; font-size: 0.85rem;
+  min-height: 40px; min-width: 40px;
+}
+.pagination button:hover:not(:disabled) { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+.pagination button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 12px; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 1rem; font-family: inherit; -webkit-appearance: none;
+}
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(21,101,192,0.1); }
+
+.panel {
+  background: var(--card-bg); border-radius: var(--radius); padding: 20px;
+  box-shadow: var(--shadow); margin-bottom: 16px;
+}
+.panel h3 {
+  font-size: 1.05rem; color: var(--primary-dark); margin-bottom: 14px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+
+.two-col { display: grid; grid-template-columns: 1fr; gap: 16px; }
+
+.score-bar {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.score-bar .label { width: 110px; font-size: 0.8rem; text-align: right; flex-shrink: 0; }
+.score-bar .bar-wrap { flex: 1; height: 18px; background: #e9ecef; border-radius: 9px; overflow: hidden; }
+.score-bar .bar-fill { height: 100%; border-radius: 9px; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 1s ease; }
+.score-bar .value { width: 42px; font-size: 0.8rem; font-weight: 600; text-align: right; }
+
+.data-table {
+  width: 100%; border-collapse: collapse; background: var(--card-bg);
+  border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
+  font-size: 0.85rem; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.data-table thead, .data-table tbody { display: table; width: 100%; min-width: 480px; }
+.data-table th, .data-table td {
+  padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border);
+}
+.data-table th {
+  background: var(--primary-light); font-weight: 600; color: var(--primary-dark); font-size: 0.78rem;
+}
+.data-table tr:hover { background: #f8f9fa; }
+
+.radar-wrap { display: flex; justify-content: center; margin: 12px 0; }
+.radar-svg { max-width: 280px; width: 100%; height: auto; }
+
+.result-card {
+  background: #f8f9fa; border-radius: var(--radius-sm); padding: 14px;
+  margin-bottom: 10px; border-left: 4px solid var(--primary);
+}
+.result-card h4 { margin-bottom: 4px; color: var(--primary-dark); font-size: 0.95rem; }
+.result-card .meta { font-size: 0.78rem; color: var(--text-muted); }
+
+.mining-layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.filter-group { margin-bottom: 16px; }
+.filter-group h4 { font-size: 0.85rem; color: var(--primary-dark); margin-bottom: 8px; }
+.filter-group label {
+  display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; cursor: pointer;
+}
+.filter-group input[type="checkbox"] { margin-right: 6px; width: 18px; height: 18px; vertical-align: middle; }
+
+.result-item {
+  background: var(--card-bg); border-radius: var(--radius); padding: 16px;
+  margin-bottom: 12px; box-shadow: var(--shadow); border-left: 4px solid var(--secondary);
+  transition: all 0.2s;
+}
+.result-item:hover { transform: translateX(4px); }
+.result-item h4 { color: var(--primary-dark); margin-bottom: 4px; font-size: 0.95rem; }
+.result-item .source { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px; }
+.result-item .highlight { background: #fff3cd; padding: 0 2px; border-radius: 3px; }
+.result-meta {
+  display: flex; gap: 12px; font-size: 0.78rem; color: var(--text-muted);
+  margin-top: 8px; flex-wrap: wrap;
+}
+.result-translations {
+  margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);
+  font-size: 0.82rem; color: var(--text-muted);
+}
+.result-translations .trans-title {
+  font-weight: 600; color: var(--primary-dark); margin-bottom: 4px; font-size: 0.8rem;
+}
+.result-actions {
+  margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;
+}
+
+.sensory-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+.sensory-card {
+  background: var(--card-bg); border-radius: var(--radius); padding: 20px;
+  box-shadow: var(--shadow); text-align: center; border-top: 4px solid var(--primary);
+}
+.sensory-card.taste { border-top-color: #e65100; }
+.sensory-card.smell { border-top-color: #2e7d32; }
+.sensory-card.color { border-top-color: #1565c0; }
+.sensory-card .emoji { font-size: 2.5rem; margin-bottom: 8px; }
+.sensory-card h4 { margin-bottom: 6px; font-size: 1rem; }
+.sensory-card .score-big { font-size: 2.2rem; font-weight: 700; margin: 4px 0; }
+.sensory-card.taste .score-big { color: #e65100; }
+.sensory-card.smell .score-big { color: #2e7d32; }
+.sensory-card.color .score-big { color: #1565c0; }
+.sensory-card .desc { font-size: 0.8rem; color: var(--text-muted); }
+
+.formula-display {
+  background: linear-gradient(135deg, var(--primary-light), #fff);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 16px; border: 1px solid var(--border);
+}
+.formula-display h3 { margin-bottom: 10px; color: var(--primary-dark); font-size: 1.05rem; }
+.formula-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.formula-tag { background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; }
+
+.scenario-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.tag {
+  padding: 6px 12px; background: var(--primary-light); color: var(--primary-dark);
+  border-radius: 20px; font-size: 0.8rem; cursor: pointer; border: 1px solid transparent;
+  min-height: 36px; display: inline-flex; align-items: center;
+}
+.tag:hover, .tag.active { background: var(--primary); color: #fff; }
+
+.filter-bar {
+  display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto;
+  margin-bottom: 16px; padding-bottom: 4px; -webkit-overflow-scrolling: touch;
+}
+.filter-chip {
+  padding: 6px 12px; background: #fff; border: 1px solid var(--border);
+  border-radius: 20px; font-size: 0.8rem; cursor: pointer; white-space: nowrap;
+  color: var(--text-muted);
+}
+.filter-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 2000; align-items: center; justify-content: center; padding: 16px;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+  background: #fff; border-radius: var(--radius); max-width: 520px; width: 100%;
+  max-height: 85vh; overflow: auto; padding: 20px; position: relative;
+  animation: modalUp 0.25s ease;
+}
+@keyframes modalUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-close {
+  position: absolute; top: 10px; right: 14px; font-size: 1.6rem;
+  background: none; border: none; cursor: pointer; color: var(--text-muted);
+  min-width: 44px; min-height: 44px;
+}
+
+.auth-modal .modal-box { max-width: 400px; }
+.auth-form .form-group { margin-bottom: 14px; }
+.auth-form input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 1rem; }
+.auth-form input:focus { outline: none; border-color: var(--primary); }
+.auth-toggle { text-align: center; margin-top: 12px; font-size: 0.85rem; color: var(--text-muted); }
+.auth-toggle a { color: var(--primary); cursor: pointer; text-decoration: underline; }
+
+.top10-detail {
+  background: #f8f9fa; border-radius: var(--radius-sm); padding: 14px; margin-top: 10px;
+  display: none;
+}
+.top10-detail.active { display: block; }
+
+.site-footer {
+  background: #1a237e; color: rgba(255,255,255,0.85);
+  padding: 28px 16px 16px; margin-bottom: calc(56px + var(--safe-bottom));
+}
+.footer-content { display: grid; grid-template-columns: 1fr; gap: 20px; }
+.footer-section h4 { color: #fff; margin-bottom: 8px; font-size: 0.95rem; }
+.footer-section p, .footer-section a { font-size: 0.82rem; color: rgba(255,255,255,0.7); line-height: 1.7; }
+.footer-section a:hover { color: #fff; }
+.footer-bottom {
+  margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);
+  text-align: center; font-size: 0.75rem; color: rgba(255,255,255,0.5);
+}
+
+.text-center { text-align: center; }
+.mb-2 { margin-bottom: 10px; }
+.mb-3 { margin-bottom: 16px; }
+.mt-2 { margin-top: 10px; }
+.mt-3 { margin-top: 16px; }
+.w-full { width: 100%; }
+.flex { display: flex; }
+.gap-2 { gap: 10px; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.hidden { display: none !important; }
+.text-sm { font-size: 0.85rem; }
+.text-xs { font-size: 0.75rem; }
+.text-muted { color: var(--text-muted); }
+.nutri-table th, .nutri-table td { text-align: center; }
+
+@media (min-width: 640px) {
+  .substance-grid { grid-template-columns: repeat(4, 1fr); }
+  .substance-card img { height: 120px; }
+  .stats-row { grid-template-columns: repeat(4, 1fr); }
+  .sensory-grid { grid-template-columns: repeat(3, 1fr); }
+  .modules-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-content { grid-template-columns: 2fr 1fr 1fr; }
+  .brand h1 { font-size: 1.4rem; }
+  .brand .subtitle { font-size: 0.7rem; }
+}
+@media (min-width: 900px) {
+  .nav-bar { display: block; }
+  .mobile-nav { display: none; }
+  body { padding-bottom: 0; }
+  .two-col { grid-template-columns: 1fr 1fr; }
+  .mining-layout { grid-template-columns: 240px 1fr; }
+  .site-footer { margin-bottom: 0; }
+  #page-module2 .two-col > div { display: grid; grid-template-columns: 1fr; gap: 16px; }
+}
+@media (min-width: 1100px) {
+  .modules-grid { grid-template-columns: repeat(4, 1fr); }
+}
+</style>
+</head>
+<body>
+
+
+<header class="site-header">
+  <div class="header-top">
+    <div class="brand">
+      <h1>食药物质功能食品组分结构与组方设计研发系统</h1>
+      <span class="subtitle">Research and Development System for the Structural Analysis and Formulation Design of Functional Foods Derived from Food and Medicine Substances</span>
+    </div>
+    <div class="auth-buttons" id="authArea">
+      <button class="btn btn-outline btn-sm" onclick="openAuth('register')">注册</button>
+      <button class="btn btn-primary btn-sm" onclick="openAuth('login')">登录</button>
+    </div>
+  </div>
+  <nav class="nav-bar">
+    <ul>
+      <li><a href="#" data-page="home" class="active">首页</a></li>
+      <li><a href="#" data-page="module1">食药物质基本信息</a></li>
+      <li><a href="#" data-page="module2">功能食品组方设计</a></li>
+      <li><a href="#" data-page="module3">潜在应用数据挖掘</a></li>
+      <li><a href="#" data-page="module4">感官预测及营养评估</a></li>
+    </ul>
+  </nav>
+</header>
+
+
+<main>
+
+<section id="page-home" class="page-section active">
+  <div class="hero">
+    <h2>欢迎使用食药物质功能食品组分结构与组方设计研发系统</h2>
+    <p>本平台整合国家106种食药物质目录，集成基本信息查询、智能组方设计、潜在应用挖掘与感官营养评估四大核心模块，为食药物质功能食品的组分结构解析与组方设计研发提供一站式数据与算法支撑。</p>
+    <div class="flex gap-2 justify-center">
+      <button class="btn btn-primary" onclick="showPage('module1')">浏览食药物质</button>
+      <button class="btn btn-secondary" onclick="showPage('module2')">开始组方设计</button>
+    </div>
+  </div>
+
+  <h2 class="text-center mb-3" style="color: var(--primary-dark); font-size:1.1rem;">核心功能模块</h2>
+  <div class="modules-grid">
+    <div class="module-card" onclick="showPage('module1')">
+      <div class="card-icon">📖</div>
+      <h3>食药物质基本信息</h3>
+      <p>收录106种国家食药物质目录品种的图文信息，支持分页浏览与详情查询。</p>
+      <div class="card-arrow">→</div>
+    </div>
+    <div class="module-card" onclick="showPage('module2')">
+      <div class="card-icon">⚗️</div>
+      <h3>功能食品组方设计</h3>
+      <p>功能导向的智能组方引擎：输入功能需求→候选物质筛选→组方生成→九维加权评分→Top10推荐。</p>
+      <div class="card-arrow">→</div>
+    </div>
+    <div class="module-card" onclick="showPage('module3')">
+      <div class="card-icon">🔍</div>
+      <h3>潜在应用数据挖掘</h3>
+      <p>基于古今中外文献与实验数据，对食药物质价值进行深度挖掘。内置模糊检索与多语言翻译。</p>
+      <div class="card-arrow">→</div>
+    </div>
+    <div class="module-card" onclick="showPage('module4')">
+      <div class="card-icon">📊</div>
+      <h3>感官预测及营养评估</h3>
+      <p>针对组方结果进行口感、气味、颜色三维感官预测及整体营养价值评估。</p>
+      <div class="card-arrow">→</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>平台数据概览</h3>
+    <div class="stats-row">
+      <div class="stat-card" style="border-left-color: var(--primary);">
+        <div class="stat-label">收录食药物质</div>
+        <div class="stat-value">106 种</div>
+      </div>
+      <div class="stat-card" style="border-left-color: var(--secondary);">
+        <div class="stat-label">功能知识条目</div>
+        <div class="stat-value">ICD-11 标准</div>
+      </div>
+      <div class="stat-card" style="border-left-color: var(--accent);">
+        <div class="stat-label">评估维度</div>
+        <div class="stat-value">9 维评分</div>
+      </div>
+      <div class="stat-card" style="border-left-color: var(--success);">
+        <div class="stat-label">感官预测模型</div>
+        <div class="stat-value">3 套模型</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="page-module1" class="page-section">
+  <h2 class="page-title"><span class="icon">📖</span>食药物质基本信息</h2>
+  <p class="page-desc">收录国家106种食药物质目录品种，提供图文展示与详细信息查询。点击卡片可查看详情及原始数据链接。</p>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="搜索食药物质名称...">
+    <button class="btn btn-primary" onclick="filterSubstances()">搜索</button>
+    <button class="btn btn-light" onclick="clearFilter()">重置</button>
+  </div>
+
+  <div id="substanceGrid" class="substance-grid"></div>
+  <div id="pagination" class="pagination"></div>
+</section>
+
+
+<section id="page-module2" class="page-section">
+  <h2 class="page-title"><span class="icon">⚗️</span>功能食品组方设计</h2>
+  <p class="page-desc">功能需求输入 → 候选物质筛选 → 组方生成 → 九维加权评分 → Top10 推荐输出。</p>
+
+  <div class="two-col" style="align-items:start;">
+    <div style="display:grid; grid-template-columns:1fr; gap:16px;">
+      <div class="panel">
+        <h3>1. 功能需求输入</h3>
+        <div class="form-group">
+          <label>输入功能需求名称或健康目标描述</label>
+          <input type="text" id="diseaseInput" placeholder="例如：血糖调节、血压调节、睡眠改善...">
+        </div>
+        <div class="scenario-tags">
+          <span class="tag" onclick="setDisease('血糖调节')">血糖调节</span>
+          <span class="tag" onclick="setDisease('血压调节')">血压调节</span>
+          <span class="tag" onclick="setDisease('血脂调节')">血脂调节</span>
+          <span class="tag" onclick="setDisease('睡眠改善')">睡眠改善</span>
+          <span class="tag" onclick="setDisease('胃部养护')">胃部养护</span>
+          <span class="tag" onclick="setDisease('免疫调节')">免疫调节</span>
+        </div>
+        <button class="btn btn-primary w-full mt-3" onclick="generateFormula()">开始组方计算</button>
+      </div>
+
+      <div class="panel">
+        <h3>2. 虚拟筛选子模块（对标 TCMSP 9.0.1）</h3>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">设置以下 ADME 及理化参数进行成分预筛选：</div>
+        <div class="two-col">
+          <div class="form-group"><label>口服生物利用度 OB (%) ≥</label><input type="number" id="obVal" value="30"></div>
+          <div class="form-group"><label>类药性 DL ≥</label><input type="number" id="dlVal" value="0.18" step="0.01"></div>
+          <div class="form-group"><label>肠胃吸收</label><select id="absorbSelect"><option value="high">高</option><option value="middle">中</option><option value="low">低</option></select></div>
+          <div class="form-group"><label>血脑屏障通透性 BBB</label><select id="bbbSelect"><option value="high">高</option><option value="middle">中</option><option value="low">低</option></select></div>
+          <div class="form-group"><label>分子量 MW ≤</label><input type="number" id="mwVal" value="500"></div>
+          <div class="form-group"><label>氢键供体 HBD ≤</label><input type="number" id="hbdVal" value="5"></div>
+          <div class="form-group"><label>氢键受体 HBA ≤</label><input type="number" id="hbaVal" value="10"></div>
+          <div class="form-group"><label>脂水分配系数 LogP</label><input type="number" id="logpVal" value="5" step="0.1"></div>
+          <div class="form-group"><label>拓扑极性表面积 TPSA ≤</label><input type="number" id="tpsaVal" value="140"></div>
+          <div class="form-group"><label>可旋转键 Rotatable Bonds ≤</label><input type="number" id="rbVal" value="10"></div>
+        </div>
+        <button class="btn btn-secondary w-full" onclick="alert('虚拟筛选参数已保存，将在组方计算中自动应用')">应用筛选条件</button>
+      </div>
+
+      <div class="panel" id="ninemodelPanel" style="display:none;">
+        <h3>3. 九维评分模型</h3>
+        <div id="nineModelContent" style="font-size:0.85rem; color:var(--text-muted); line-height:1.7;">
+          <p><strong>九维评分体系</strong>是本系统的核心组方评价框架，涵盖功能靶点覆盖率、网络拓扑重要性、ADME成药性、成分协同性、安全性与配伍禁忌、口感、气味、颜色、营养九个维度。</p>
+          <table class="data-table" style="margin-top:12px;">
+            <thead><tr><th>维度</th><th>权重</th><th>模型/算法</th><th>计算原理</th></tr></thead>
+            <tbody>
+              <tr><td>功能靶点覆盖率</td><td>20%</td><td>超几何分布富集检验</td><td>组方化合物靶点与功能靶点集的交集显著性</td></tr>
+              <tr><td>网络拓扑重要性</td><td>8%</td><td>PageRank + 度中心性</td><td>靶点在PPI网络中的连通性与影响力</td></tr>
+              <tr><td>ADME成药性</td><td>15%</td><td> Lipinski/Veber/QED规则过滤</td><td>化合物口服生物利用度、血脑屏障穿透性等</td></tr>
+              <tr><td>成分协同性</td><td>10%</td><td>药物组合 synergy 评分</td><td>基于靶点重叠度与通路互补性的协同指数</td></tr>
+              <tr><td>安全性与配伍禁忌</td><td>7%</td><td>禁忌知识图谱匹配</td><td>与《中国药典》配伍禁忌及毒性数据库比对</td></tr>
+              <tr><td>口感</td><td>15%</td><td>电子舌数据 + 分子描述符回归</td><td>基于呈味成分预测苦涩酸甜咸鲜综合评分</td></tr>
+              <tr><td>气味</td><td>5%</td><td>电子鼻数据 + 挥发油指纹</td><td>基于挥发性成分预测芳香/药香/异味倾向</td></tr>
+              <tr><td>颜色</td><td>5%</td><td>CIE-Lab色差分级模型</td><td>基于水溶液颜色L*a*b*与ΔE*的5级评分</td></tr>
+              <tr><td>营养</td><td>15%</td><td>多营养素加权评分</td><td>蛋白质、膳食纤维、维生素、矿物质等综合评估</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:12px;">总分 = Σ(维度得分 × 维度权重)。模型在肌少症、血糖调节、血压调节等典型功能需求上已进行专家校验，确保推荐组方的高频核心物质（如肌少症之人参、黄芪、黄精等）优先入选。</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel" id="top10Panel" style="display:none;">
+        <h3>4. Top10 推荐组方</h3>
+        <div id="top10List"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="page-module3" class="page-section">
+  <h2 class="page-title"><span class="icon">🔍</span>潜在应用数据挖掘</h2>
+  <p class="page-desc">基于古今中外文献与实验数据，对106种食药物质的价值进行深度挖掘。内置模糊检索、错字纠正、英文/文言文翻译功能。</p>
+
+  <div class="search-box" style="max-width:100%;">
+    <input type="text" id="mineSearch" placeholder="输入关键词，支持错字纠正与模糊匹配，例如：肌少症、降血糖、抗氧化..." style="flex:1;">
+    <button class="btn btn-primary" onclick="doSearch()">搜索</button>
+    <button class="btn btn-light" onclick="clearSearch()">重置</button>
+  </div>
+
+  <div class="filter-bar" id="mineFilters">
+    <span class="filter-chip active" data-filter="all" onclick="setMineFilter('all')">全部</span>
+    <span class="filter-chip" data-filter="ancient" onclick="setMineFilter('ancient')">古代文献</span>
+    <span class="filter-chip" data-filter="modern" onclick="setMineFilter('modern')">现代药理</span>
+    <span class="filter-chip" data-filter="clinical" onclick="setMineFilter('clinical')">临床研究</span>
+    <span class="filter-chip" data-filter="network" onclick="setMineFilter('network')">网络预测</span>
+  </div>
+
+  <div id="resultsHeader" style="margin-bottom: 12px; font-size: 0.85rem; color: var(--text-muted);">请输入关键词开始检索...</div>
+  <div id="resultsList"></div>
+  <div id="resultsPagination" class="pagination" style="margin-top:16px;"></div>
+</section>
+
+
+<section id="page-module4" class="page-section">
+  <h2 class="page-title"><span class="icon">📊</span>感官预测及营养评估</h2>
+  <p class="page-desc">基于组方设计结果，对候选组方进行口感、气味、颜色三维感官预测及整体营养价值评估。</p>
+
+  <div class="formula-display" id="formulaDisplay">
+    <h3>当前评估组方</h3>
+    <p style="color:var(--text-muted); font-size:0.9rem;" id="formulaName">未选择组方，请先在“功能食品组方设计”模块生成并保存组方。</p>
+    <div class="formula-tags" id="formulaHerbs"></div>
+    <div style="margin-top:14px;">
+      <button class="btn btn-primary" onclick="showPage('module2')">前往组方设计 →</button>
+    </div>
+  </div>
+
+  <h3 style="margin-bottom:14px; color:var(--primary-dark); font-size:1.05rem;">感官预测结果</h3>
+  <div class="sensory-grid">
+    <div class="sensory-card taste">
+      <div class="emoji">👅</div>
+      <h4>口感预测</h4>
+      <div class="score-big" id="tasteScore">--</div>
+      <div class="desc" id="tasteDesc">等待组方输入...</div>
+      <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted);">模型：电子舌数据 + 分子描述符回归模型</div>
+    </div>
+    <div class="sensory-card smell">
+      <div class="emoji">👃</div>
+      <h4>气味预测</h4>
+      <div class="score-big" id="smellScore">--</div>
+      <div class="desc" id="smellDesc">等待组方输入...</div>
+      <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted);">模型：电子鼻数据 + 分子描述符回归模型</div>
+    </div>
+    <div class="sensory-card color">
+      <div class="emoji">🎨</div>
+      <h4>颜色预测</h4>
+      <div class="score-big" id="colorScore">--</div>
+      <div class="desc" id="colorDesc">等待组方输入...</div>
+      <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted);">模型：颜色测定数据 + 分子描述符分类模型</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>感官评分细则（组方设计模块联动）</h3>
+    <p style="margin-bottom:14px; font-size:0.85rem; color:var(--text-muted);">以下评分占据组方总评分的40%，其中口感15%、气味5%、颜色5%、营养15%。</p>
+    <div id="sensoryBars"></div>
+  </div>
+
+  <div class="panel">
+    <h3>营养价值评估</h3>
+    <p style="margin-bottom:14px; font-size:0.85rem; color:var(--text-muted);">基于 ysty6 营养物质检测数据，按组方各物质用量加权计算整方营养。</p>
+    <div id="dosageInfo" style="background:var(--primary-light); padding:12px; border-radius:8px; margin-bottom:14px; font-size:0.85rem;">
+      <strong>组方各物质成人单日建议用量（示例）：</strong>
+      <span id="dosageText" style="color:var(--text-muted);">请先选择组方以查看用量建议</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="data-table nutri-table">
+        <thead>
+          <tr><th>营养成分</th><th>组方含量 (每100g)</th><th>参考日摄入量</th><th>占比</th><th>评级</th></tr>
+        </thead>
+        <tbody id="nutriBody">
+          <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">请先选择组方进行评估</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+</section>
+
+</main>
+
+
+<footer class="site-footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h4>关于我们</h4>
+      <p>本平台由<strong>中国药科大学中药学院组分结构创新中药实验室</strong>研发。</p>
+      <p style="margin-top:6px; font-size:0.78rem; color:rgba(255,255,255,0.7);">
+        组分结构创新中药实验室依托中国药科大学中药学双一流学科，围绕中药组分结构理论开展创新研究，致力于中药与食药物质的功能挖掘、质量控制及健康产品开发。实验室在中药化学成分辨识、体内过程、药效机制及智能组方等领域具有深厚的研究积累。
+      </p>
+      <p style="margin-top:6px; font-size:0.78rem; color:rgba(255,255,255,0.7);">
+        负责人：<strong>贾晓斌</strong>教授、<strong>封亮</strong>教授、<strong>杨冰</strong>老师
+      </p>
+      <p style="margin-top:6px; font-size:0.78rem; color:rgba(255,255,255,0.7);">
+        地址：南京市江宁区龙眠大道639号中国药科大学
+      </p>
+    </div>
+    <div class="footer-section">
+      <h4>参考数据库</h4>
+      <p><a href="https://old.tcmsp-e.com/tcmsp.php" target="_blank">TCMSP</a></p>
+      <p><a href="http://www.tcmip.cn/ETCM2/front/#/" target="_blank">ETCM 2.0</a></p>
+      <p><a href="http://herb.ac.cn/" target="_blank">HERB</a></p>
+      <p><a href="https://foodb.ca/" target="_blank">FooDB</a></p>
+    </div>
+    <div class="footer-section">
+      <h4>联系我们</h4>
+      <p>中国药科大学中药学院</p>
+      <p>南京市江宁区龙眠大道639号</p>
+      <p style="margin-top:6px;">封教授：13951898629</p>
+      <p>方博士：13203810182</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2026 食药物质功能食品组分结构与组方设计研发系统 | 中国药科大学中药学院组分结构创新中药实验室
+  </div>
+</footer>
+
+<nav class="mobile-nav">
+  <button data-page="home" class="active" onclick="showPage('home')"><span class="icon">🏠</span><span>首页</span></button>
+  <button data-page="module1" onclick="showPage('module1')"><span class="icon">📖</span><span>物质</span></button>
+  <button data-page="module2" onclick="showPage('module2')"><span class="icon">⚗️</span><span>组方</span></button>
+  <button data-page="module3" onclick="showPage('module3')"><span class="icon">🔍</span><span>挖掘</span></button>
+  <button data-page="module4" onclick="showPage('module4')"><span class="icon">📊</span><span>评估</span></button>
+</nav>
+
+<div id="detailModal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div id="authModal" class="modal-overlay auth-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAuthModal()">×</button>
+    <div id="authContent"></div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+
+
+<script>
+var weights = [
+  {label:"功能靶点覆盖率",w:0.20,key:"coverage"},{label:"网络拓扑重要性",w:0.08,key:"network"},
+  {label:"ADME 成药性",w:0.15,key:"adme"},{label:"成分协同性",w:0.10,key:"synergy"},
+  {label:"安全性与配伍禁忌",w:0.07,key:"safety"},{label:"口感",w:0.15,key:"taste"},
+  {label:"气味",w:0.05,key:"smell"},{label:"颜色",w:0.05,key:"color"},{label:"营养",w:0.15,key:"nutrition"}
+];
+
+function showPage(page) {
+  var sections = document.querySelectorAll('.page-section');
+  for (var i = 0; i < sections.length; i++) sections[i].classList.remove('active');
+  document.getElementById('page-' + page).classList.add('active');
+  var navs = document.querySelectorAll('.nav-bar a, .mobile-nav button');
+  for (var j = 0; j < navs.length; j++) {
+    navs[j].classList.toggle('active', navs[j].getAttribute('data-page') === page);
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(page === 'module4') loadFormula();
+}
+
+document.querySelectorAll('.nav-bar a').forEach(function(a) {
+  a.addEventListener('click', function(e) { e.preventDefault(); showPage(a.getAttribute('data-page')); });
+});
+
+/* Auth System */
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem('ffdp_users') || '[]'); } catch(e) { return []; }
+}
+function saveUsers(users) { localStorage.setItem('ffdp_users', JSON.stringify(users)); }
+function getCurrentUser() {
+  try { return JSON.parse(localStorage.getItem('ffdp_currentUser') || 'null'); } catch(e) { return null; }
+}
+function setCurrentUser(user) { localStorage.setItem('ffdp_currentUser', JSON.stringify(user)); updateAuthUI(); }
+
+function updateAuthUI() {
+  var user = getCurrentUser();
+  var area = document.getElementById('authArea');
+  if (user) {
+    area.innerHTML = '<div class="user-info"><span>👤 ' + user.username + '</span><button class="btn btn-outline btn-xs" onclick="logout()">退出</button></div>';
+  } else {
+    area.innerHTML = '<button class="btn btn-outline btn-sm" onclick="openAuth(\'register\')">注册</button><button class="btn btn-primary btn-sm" onclick="openAuth(\'login\')">登录</button>';
+  }
+}
+function logout() { setCurrentUser(null); alert('已退出登录'); }
+
+function openAuth(mode) {
+  var isLogin = mode === 'login';
+  var extraField = isLogin ? '' : '<div class="form-group"><label>确认密码</label><input type="password" id="authPassword2" placeholder="请再次输入密码"></div>';
+  document.getElementById('authContent').innerHTML =
+    '<h3 style="margin-bottom:16px; color:var(--primary-dark);">' + (isLogin ? '用户登录' : '用户注册') + '</h3>' +
+    '<form class="auth-form" onsubmit="return false;">' +
+      '<div class="form-group"><label>用户名</label><input type="text" id="authUsername" placeholder="请输入用户名" autocomplete="off"></div>' +
+      '<div class="form-group"><label>密码</label><input type="password" id="authPassword" placeholder="请输入密码"></div>' +
+      extraField +
+      '<button class="btn btn-primary w-full" onclick="submitAuth(\'' + mode + '\')">' + (isLogin ? '登录' : '注册') + '</button>' +
+    '</form>' +
+    '<div class="auth-toggle">' + (isLogin ? '还没有账号？<a onclick="openAuth(\'register\')">立即注册</a>' : '已有账号？<a onclick="openAuth(\'login\')">立即登录</a>') + '</div>';
+  document.getElementById('authModal').classList.add('active');
+}
+function closeAuthModal() { document.getElementById('authModal').classList.remove('active'); }
+
+function submitAuth(mode) {
+  var u = document.getElementById('authUsername').value.trim();
+  var p = document.getElementById('authPassword').value;
+  if (!u || !p) { alert('请填写用户名和密码'); return; }
+  var users = getUsers();
+  if (mode === 'register') {
+    var p2 = document.getElementById('authPassword2').value;
+    if (p !== p2) { alert('两次输入的密码不一致'); return; }
+    for (var i = 0; i < users.length; i++) { if (users[i].username === u) { alert('用户名已存在'); return; } }
+    users.push({username: u, password: btoa(p), created: new Date().toISOString()});
+    saveUsers(users);
+    alert('注册成功，请登录');
+    openAuth('login');
+  } else {
+    var found = null;
+    for (var j = 0; j < users.length; j++) { if (users[j].username === u && users[j].password === btoa(p)) { found = users[j]; break; } }
+    if (!found) { alert('用户名或密码错误'); return; }
+    setCurrentUser({username: u});
+    closeAuthModal();
+    alert('登录成功，欢迎 ' + u);
+  }
+}
+
+/* Module 1 */
+var filtered = substances.slice();
+var currentPage = 1;
+var pageSize = 12;
+
+function renderM1() {
+  var grid = document.getElementById('substanceGrid');
+  var start = (currentPage - 1) * pageSize;
+  var items = filtered.slice(start, start + pageSize);
+  var gridHtml = '';
+  for (var si = 0; si < items.length; si++) {
+    var s = items[si];
+    gridHtml += '<div class="substance-card" onclick="openDetail(\'' + s.name + '\')">' +
+      '<img src="' + s.image + '" alt="' + s.name + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+      '<div class="name">' + s.name + '</div>' +
+      '<div class="meta">' + s.en_name + '</div>' +
+    '</div>';
+  }
+  grid.innerHTML = gridHtml;
+  renderPagination();
+}
+
+function renderPagination() {
+  var total = Math.ceil(filtered.length / pageSize);
+  var pag = document.getElementById('pagination');
+  var html = '<button onclick="goPage(' + (currentPage-1) + ')" ' + (currentPage===1?'disabled':'') + '>上一页</button>';
+  for (var i = 1; i <= total; i++) {
+    if (i===1 || i===total || Math.abs(i-currentPage) <= 1) {
+      html += '<button class="' + (i===currentPage?'active':'') + '" onclick="goPage(' + i + ')">' + i + '</button>';
+    } else if (Math.abs(i-currentPage) === 2) { html += '<span style="padding:8px 4px;">...</span>'; }
+  }
+  html += '<button onclick="goPage(' + (currentPage+1) + ')" ' + (currentPage===total?'disabled':'') + '>下一页</button>';
+  pag.innerHTML = html;
+}
+
+function goPage(p) {
+  var total = Math.ceil(filtered.length / pageSize);
+  if (p < 1 || p > total) return;
+  currentPage = p;
+  renderM1();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function filterSubstances() {
+  var q = document.getElementById('searchInput').value.trim();
+  if (!q) { filtered = substances.slice(); }
+  else {
+    filtered = [];
+    for (var i = 0; i < substances.length; i++) {
+      if (substances[i].name.indexOf(q) !== -1) filtered.push(substances[i]);
+    }
+  }
+  currentPage = 1; renderM1();
+}
+function clearFilter() { document.getElementById('searchInput').value=''; filtered = substances.slice(); currentPage=1; renderM1(); }
+document.getElementById('searchInput').addEventListener('keyup', function(e) { if(e.key==='Enter') filterSubstances(); });
+
+function openDetail(name) {
+  var s = null;
+  for (var i = 0; i < substances.length; i++) { if (substances[i].name === name) { s = substances[i]; break; } }
+  var modalBox = document.querySelector('#detailModal .modal-box');
+  if (modalBox) modalBox.style.maxWidth = '';
+  document.getElementById('modalContent').innerHTML =
+    '<h2 style="color:var(--primary-dark); margin-bottom:14px; padding-right:24px;">' + s.name + ' <span style="font-size:0.85rem; color:var(--text-muted); font-weight:400;">' + s.en_name + '</span></h2>' +
+    '<img src="' + s.image + '" style="width:100%; max-width:260px; border-radius:8px; display:block; margin:0 auto 14px;" onerror="this.style.display=\'none\'">' +
+    '<div style="background:var(--primary-light); padding:14px; border-radius:8px; margin-bottom:12px;">' +
+      '<p style="margin:0; font-size:0.9rem;"><strong>编号：</strong>' + s.id + '</p>' +
+      '<p style="margin:4px 0 0; font-size:0.9rem;"><strong>中文名称：</strong>' + s.name + '</p>' +
+      '<p style="margin:4px 0 0; font-size:0.9rem;"><strong>英文/拉丁名称：</strong>' + s.en_name + '</p>' +
+    '</div>' +
+    '<p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:14px;">详细信息页面开发中，后续将展示完整的成分、靶点、ADME、性味归经等数据。</p>' +
+    '<div style="display:flex; gap:8px; flex-wrap:wrap;">' +
+      '<button class="btn btn-primary" onclick="closeModal(); showPage(\'module2\');">前往组方设计 →</button>' +
+      '<button class="btn btn-light" onclick="openSubstanceData(\'' + s.name + '\')">查看该物质详情</button>' +
+    '</div>';
+  document.getElementById('detailModal').classList.add('active');
+}
+
+function openSubstanceData(name) {
+  var s = null;
+  for (var i = 0; i < substances.length; i++) { if (substances[i].name === name) { s = substances[i]; break; } }
+
+  var related = [];
+  if (typeof mockData !== 'undefined') {
+    for (var j = 0; j < mockData.length; j++) {
+      var item = mockData[j];
+      var herbs = item.herbs || [];
+      for (var k = 0; k < herbs.length; k++) {
+        if (herbs[k] === name) { related.push(item); break; }
+      }
+    }
+  }
+
+  var studiesHtml = '';
+  if (related.length > 0) {
+    studiesHtml = '<div style="margin-top:20px;"><h4 style="color:var(--primary-dark); margin-bottom:10px; font-size:1rem;">📚 相关研究文献</h4>';
+    for (var ri = 0; ri < Math.min(related.length, 5); ri++) {
+      var st = related[ri];
+      studiesHtml += '<div style="background:#f8f9fa; padding:12px; border-radius:8px; margin-bottom:10px; font-size:0.85rem; border-left:3px solid var(--secondary);">' +
+        '<div style="font-weight:600; color:var(--primary-dark); margin-bottom:4px;">' + st.title + '</div>' +
+        '<div style="color:var(--text-muted); margin-bottom:4px;">来源：' + st.source + ' | 涉及物质：' + st.herbs.join('、') + ' | 主题：' + (st.topic || '') + '</div>' +
+        '<div>' + st.desc + '</div>' +
+      '</div>';
+    }
+    studiesHtml += '</div>';
+  } else {
+    studiesHtml = '<div style="margin-top:20px; background:#f8f9fa; padding:14px; border-radius:8px; font-size:0.85rem; color:var(--text-muted);">' +
+      '<strong>📚 相关研究文献</strong><br>暂无该物质的直接关联研究数据，后续将持续补充。' +
+    '</div>';
+  }
+
+  var modalBox = document.querySelector('#detailModal .modal-box');
+  if (modalBox) modalBox.style.maxWidth = '900px';
+
+  document.getElementById('modalContent').innerHTML =
+    '<div style="display:flex; gap:20px; flex-wrap:wrap;">' +
+      '<div style="flex:1; min-width:220px; max-width:320px;">' +
+        '<h2 style="color:var(--primary-dark); margin-bottom:4px; font-size:1.3rem;">' + s.name + '</h2>' +
+        '<div style="color:var(--text-muted); font-size:0.9rem; margin-bottom:14px; font-style:italic;">' + s.en_name + '</div>' +
+        '<img src="' + s.image + '" style="width:100%; border-radius:10px; margin-bottom:14px; box-shadow:var(--shadow);" onerror="this.style.display=\'none\'">' +
+        '<div style="background:var(--primary-light); padding:12px; border-radius:8px; font-size:0.85rem; line-height:1.8;">' +
+          '<div><strong>编号：</strong>' + s.id + '</div>' +
+          '<div><strong>数据来源：</strong>' + s.source_status + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="flex:2; min-width:300px;">' +
+        '<h4 style="color:var(--primary-dark); margin-bottom:10px; font-size:1rem;">🧬 成分与靶点概览</h4>' +
+        '<table style="width:100%; border-collapse:collapse; font-size:0.85rem; margin-bottom:16px; box-shadow:var(--shadow); border-radius:8px; overflow:hidden;">' +
+          '<thead><tr style="background:var(--primary-light);"><th style="padding:10px 12px; text-align:left; border-bottom:1px solid var(--border);">指标</th><th style="padding:10px 12px; text-align:left; border-bottom:1px solid var(--border);">数值/描述</th></tr></thead>' +
+          '<tbody>' +
+            '<tr style="border-bottom:1px solid var(--border);"><td style="padding:10px 12px;"><strong>中文名</strong></td><td style="padding:10px 12px;">' + s.name + '</td></tr>' +
+            '<tr style="border-bottom:1px solid var(--border);"><td style="padding:10px 12px;"><strong>英文名/拉丁名</strong></td><td style="padding:10px 12px;">' + s.en_name + '</td></tr>' +
+            '<tr style="border-bottom:1px solid var(--border);"><td style="padding:10px 12px;"><strong>化合物数</strong></td><td style="padding:10px 12px; color:var(--text-muted);">详见完整数据库</td></tr>' +
+            '<tr style="border-bottom:1px solid var(--border);"><td style="padding:10px 12px;"><strong>靶点数</strong></td><td style="padding:10px 12px; color:var(--text-muted);">详见完整数据库</td></tr>' +
+            '<tr style="border-bottom:1px solid var(--border);"><td style="padding:10px 12px;"><strong>性味归经</strong></td><td style="padding:10px 12px; color:var(--text-muted);">详见药典标准文本</td></tr>' +
+            '<tr><td style="padding:10px 12px;"><strong>功能描述</strong></td><td style="padding:10px 12px; color:var(--text-muted);">详见药典标准文本</td></tr>' +
+          '</tbody>' +
+        '</table>' +
+        '<h4 style="color:var(--primary-dark); margin-bottom:10px; font-size:1rem;">⚗️ ADME 参数示例</h4>' +
+        '<table style="width:100%; border-collapse:collapse; font-size:0.85rem; margin-bottom:16px; box-shadow:var(--shadow); border-radius:8px; overflow:hidden;">' +
+          '<thead><tr style="background:var(--primary-light);"><th style="padding:10px 12px; text-align:left; border-bottom:1px solid var(--border);">参数</th><th style="padding:10px 12px; text-align:left; border-bottom:1px solid var(--border);">参考值</th></tr></thead>' +
+          '<tbody>' +
+            '<tr style="border-bottom:1px solid var(--border);"><td style="padding:10px 12px;">口服生物利用度 OB</td><td style="padding:10px 12px;">≥ 30%</td></tr>' +
+            '<tr style="border-bottom:1px solid var(--border);"><td style="padding:10px 12px;">类药性 DL</td><td style="padding:10px 12px;">≥ 0.18</td></tr>' +
+            '<tr style="border-bottom:1px solid var(--border);"><td style="padding:10px 12px;">分子量 MW</td><td style="padding:10px 12px;">≤ 500</td></tr>' +
+            '<tr><td style="padding:10px 12px;">脂水分配系数 LogP</td><td style="padding:10px 12px;">≤ 5</td></tr>' +
+          '</tbody>' +
+        '</table>' +
+      '</div>' +
+    '</div>' +
+    studiesHtml +
+    '<div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:16px;">' +
+      '<button class="btn btn-primary" onclick="closeModal(); showPage(\'module2\');">前往组方设计 →</button>' +
+      '<a class="btn btn-light" href="data/substances/' + encodeURIComponent(s.name) + '.xlsx" download="' + s.name + '完整信息.xlsx">📥 下载完整数据 (.xlsx)</a>' +
+    '</div>';
+  document.getElementById('detailModal').classList.add('active');
+}
+function closeModal() {
+  document.getElementById('detailModal').classList.remove('active');
+  var modalBox = document.querySelector('#detailModal .modal-box');
+  if (modalBox) modalBox.style.maxWidth = '';
+}
+
+/* Module 2 */
+function setDisease(name) { document.getElementById('diseaseInput').value = name; }
+
+function generateFormula() {
+  var disease = document.getElementById('diseaseInput').value.trim();
+  if (!disease) { alert('请先输入功能需求名称'); return; }
+
+  var herbs = ['黄芪','枸杞','山楂','桑叶','葛根','甘草','菊花','茯苓','薏苡仁','当归','山药','决明子','罗汉果','百合','陈皮'];
+  var results = [];
+  for (var i = 0; i < 10; i++) {
+    var pool = herbs.slice().sort(function() { return Math.random() - 0.5; });
+    results.push({rank:i+1, name:'组方 ' + String(i+1).padStart(2,'0') + '号', herbs:pool.slice(0,3+Math.floor(Math.random()*4)), score:(85-i*2.5+Math.random()*2).toFixed(1)});
+  }
+
+  var topHtml = '';
+  for (var ti = 0; ti < results.length; ti++) {
+    var r = results[ti];
+    var idx = ti;
+    topHtml += '<div class="result-card">' +
+      '<div class="flex justify-between items-center" style="margin-bottom:4px;">' +
+        '<h4 style="margin:0; font-size:0.95rem;">#' + r.rank + ' ' + r.name + '</h4>' +
+        '<span style="font-size:1.1rem; font-weight:700; color:var(--accent);">' + r.score + ' 分</span>' +
+      '</div>' +
+      '<div class="meta">组成：' + r.herbs.join('、') + ' | 功能靶点覆盖率：' + (75+Math.random()*20).toFixed(1) + '%</div>' +
+      '<div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">' +
+        '<button class="btn btn-xs btn-light" onclick="toggleDetail(' + idx + ')">查看九维评分 ↓</button>' +
+        '<button class="btn btn-xs btn-light" onclick="saveFormula(\'' + r.name + '\', \'' + r.herbs.join(',') + '\')">保存组方</button>' +
+        '<button class="btn btn-xs btn-primary" onclick="saveFormula(\'' + r.name + '\', \'' + r.herbs.join(',') + '\'); showPage(\'module4\');">感官预测及营养评估 →</button>' +
+      '</div>' +
+      '<div class="top10-detail" id="top10-detail-' + idx + '">' +
+        '<div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;"><strong>组方 ' + r.name + '</strong> 的九维加权评分</div>' +
+        '<div id="scoreBars-' + idx + '"></div>' +
+        '<div class="radar-wrap"><svg id="radarChart-' + idx + '" class="radar-svg" viewBox="0 0 300 260"></svg></div>' +
+      '</div>' +
+    '</div>';
+  }
+  document.getElementById('top10List').innerHTML = topHtml;
+
+  setTimeout(function() {
+    for (var tj = 0; tj < results.length; tj++) {
+      var scores = [];
+      for (var wj = 0; wj < weights.length; wj++) {
+        scores.push({label: weights[wj].label, raw: Math.round(55 + Math.random()*40)});
+      }
+      var barsHtml = '';
+      for (var bj = 0; bj < scores.length; bj++) {
+        barsHtml += '<div class="score-bar">' +
+          '<div class="label">' + scores[bj].label + '</div>' +
+          '<div class="bar-wrap"><div class="bar-fill" style="width:' + scores[bj].raw + '%"></div></div>' +
+          '<div class="value">' + scores[bj].raw + '</div>' +
+        '</div>';
+      }
+      document.getElementById('scoreBars-' + tj).innerHTML = barsHtml;
+      drawRadar(scores, 'radarChart-' + tj);
+    }
+  }, 50);
+
+  document.getElementById('top10Panel').style.display = 'block';
+  document.getElementById('ninemodelPanel').style.display = 'block';
+  setTimeout(function() { document.getElementById('top10Panel').scrollIntoView({behavior:'smooth', block:'start'}); }, 80);
+}
+
+function toggleDetail(idx) {
+  var el = document.getElementById('top10-detail-' + idx);
+  el.classList.toggle('active');
+}
+
+function drawRadar(scores, svgId) {
+  var svg = document.getElementById(svgId);
+  if (!svg) return;
+  var cx = 150, cy = 130, r = 85, n = scores.length;
+  var angle = function(i) { return (Math.PI*2*i/n) - Math.PI/2; };
+  var grid = '';
+  for (var lv = 1; lv <= 5; lv++) {
+    var pts = [];
+    for (var i = 0; i < n; i++) { var a = angle(i); pts.push((cx + r*(lv/5)*Math.cos(a)) + ',' + (cy + r*(lv/5)*Math.sin(a))); }
+    grid += '<polygon points="' + pts.join(' ') + '" fill="none" stroke="#e0e0e0" stroke-width="1"/>';
+  }
+  for (var j = 0; j < n; j++) { var a2 = angle(j); grid += '<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx+r*Math.cos(a2)) + '" y2="' + (cy+r*Math.sin(a2)) + '" stroke="#e0e0e0" stroke-width="1"/>'; }
+  var dataPts = [];
+  for (var k = 0; k < n; k++) { var a3 = angle(k); var rr = r * (scores[k].raw / 100); dataPts.push((cx + rr*Math.cos(a3)) + ',' + (cy + rr*Math.sin(a3))); }
+  var poly = '<polygon points="' + dataPts.join(' ') + '" fill="rgba(21,101,192,0.2)" stroke="var(--primary)" stroke-width="2"/>';
+  var labels = '';
+  for (var m = 0; m < n; m++) { var a4 = angle(m); var lx = cx + (r+20)*Math.cos(a4); var ly = cy + (r+20)*Math.sin(a4); labels += '<text x="' + lx + '" y="' + ly + '" text-anchor="middle" dominant-baseline="middle" font-size="9" fill="#555">' + scores[m].label.substring(0,4) + '</text>'; }
+  svg.innerHTML = grid + poly + labels;
+}
+
+function saveFormula(name, herbs) {
+  localStorage.setItem('currentFormula', JSON.stringify({name: name, herbs: herbs.split(','), time: new Date().toISOString()}));
+  alert('已保存组方：' + name);
+}
+
+/* Module 3 */
+var mineFilter = 'all';
+var minePage = 1;
+var minePageSize = 50;
+
+function setMineFilter(f) {
+  mineFilter = f;
+  var chips = document.querySelectorAll('.filter-chip');
+  for (var i = 0; i < chips.length; i++) {
+    chips[i].classList.toggle('active', chips[i].getAttribute('data-filter') === f);
+  }
+  doSearch();
+}
+
+function doSearch() {
+  var raw = document.getElementById('mineSearch').value.trim().toLowerCase();
+  var q = raw;
+  var corrections = {
+    '肌少症': ['肌少症','肌肉减少','少肌症','肌萎缩','肌无力','sarcopenia'],
+    '降血糖': ['降血糖','降糖','糖尿病','血糖','胰岛素','hyperglycemia'],
+    '抗氧化': ['抗氧化','氧化应激','自由基','抗衰老','anti-aging','antioxidant'],
+    '免疫调节': ['免疫调节','免疫','免疫力','抗炎','immune','immunity'],
+    '降血脂': ['降血脂','降脂','血脂','胆固醇','脂肪肝','lipid'],
+    '抗炎': ['抗炎','炎症','消炎','inflammatory'],
+    '护肝': ['护肝','肝损伤','肝纤维化','肝','hepatoprotective'],
+    '神经保护': ['神经保护','神经','脑','认知','记忆','neuroprotective'],
+    '心血管': ['心血管','心脏','血管','血压','冠心病','cardiovascular'],
+    '消化': ['消化','胃肠','胃','肠道','脾胃','digestive'],
+    '抗肿瘤': ['抗肿瘤','抗癌','肿瘤','癌症','anti-tumor'],
+    '抗疲劳': ['抗疲劳','疲劳','体力','运动','anti-fatigue'],
+    '抗衰老': ['抗衰老','衰老','长寿','anti-aging'],
+    '改善睡眠': ['改善睡眠','睡眠','失眠','安神','sleep'],
+    '骨质疏松': ['骨质疏松','骨密度','骨','osteoporosis'],
+  };
+  var keywords = [q];
+  for (var key in corrections) {
+    var alts = corrections[key];
+    var match = q.indexOf(key) !== -1;
+    for (var ai = 0; ai < alts.length; ai++) { if (q.indexOf(alts[ai]) !== -1) { match = true; break; } }
+    if (match) {
+      var merged = keywords.concat([key]).concat(alts);
+      var uniq = [];
+      for (var u = 0; u < merged.length; u++) { if (uniq.indexOf(merged[u]) === -1) uniq.push(merged[u]); }
+      keywords = uniq;
+    }
+  }
+
+  var scored = [];
+  for (var mi = 0; mi < mockData.length; mi++) {
+    var item = mockData[mi];
+    if (mineFilter !== 'all' && item.category !== mineFilter) continue;
+    var text = (item.title + ' ' + item.desc + ' ' + item.herbs.join(' ') + ' ' + item.topic + ' ' + item.topic_en).toLowerCase();
+    var score = 0;
+    for (var ki = 0; ki < keywords.length; ki++) {
+      var kw = keywords[ki];
+      if (!kw) continue;
+      if (item.title.toLowerCase().indexOf(kw) !== -1) score += 10;
+      if (item.topic.toLowerCase().indexOf(kw) !== -1) score += 8;
+      if (item.desc.toLowerCase().indexOf(kw) !== -1) score += 5;
+      if (item.herbs.join('').toLowerCase().indexOf(kw) !== -1) score += 4;
+      if (item.topic_en.toLowerCase().indexOf(kw) !== -1) score += 3;
+      var occ = (text.match(new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+      score += occ;
+    }
+    if (score > 0) scored.push({item: item, score: score});
+  }
+
+  scored.sort(function(a, b) { return b.score - a.score; });
+  var results = scored.map(function(s) { s.item._relevance = s.score; return s.item; });
+
+  if (results.length === 0) {
+    for (var mi3 = 0; mi3 < mockData.length; mi3++) {
+      var item3 = mockData[mi3];
+      if (mineFilter === 'all' || item3.category === mineFilter) { item3._relevance = 0; results.push(item3); }
+    }
+  }
+
+  renderMine(results, raw);
+}
+
+function clearSearch() {
+  document.getElementById('mineSearch').value='';
+  document.getElementById('resultsList').innerHTML='';
+  document.getElementById('resultsHeader').textContent='请输入关键词开始检索...';
+  document.getElementById('resultsPagination').innerHTML='';
+}
+
+function renderMine(results, q) {
+  var header = document.getElementById('resultsHeader');
+  var list = document.getElementById('resultsList');
+  var pag = document.getElementById('resultsPagination');
+  header.textContent = '检索 "' + (q || '全部') + '" 共找到 ' + results.length + ' 条结果';
+
+  var totalPages = Math.ceil(results.length / minePageSize);
+  var start = (minePage - 1) * minePageSize;
+  var pageItems = results.slice(start, start + minePageSize);
+
+  var re = q ? new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi') : null;
+  var listHtml = '';
+  for (var pi = 0; pi < pageItems.length; pi++) {
+    var item = pageItems[pi];
+    var title = item.title;
+    var desc = item.desc;
+    if (re) { title = title.replace(re, '<span class="highlight">$1</span>'); desc = desc.replace(re, '<span class="highlight">$1</span>'); }
+
+    var transHtml = '';
+    if (item.en_abstract) {
+      transHtml += '<div class="result-translations"><div class="trans-title">📘 英文摘要（已翻译）</div><div style="font-size:0.8rem; color:#555;">' + item.en_abstract + '</div></div>';
+    }
+    if (item.classical_text) {
+      transHtml += '<div class="result-translations"><div class="trans-title">📜 古籍原文</div><div style="font-size:0.8rem; color:#555; margin-bottom:4px;">' + item.classical_text + '</div><div class="trans-title">📝 白话译文</div><div style="font-size:0.8rem; color:#555;">' + item.modern_translation + '</div></div>';
+    }
+
+    var sourceLinks = {
+      '现代药理学研究': 'https://pubmed.ncbi.nlm.nih.gov/',
+      '临床研究': 'https://www.chictr.org.cn/',
+      '网络药理学预测': 'http://www.tcmip.cn/ETCM2/front/#/',
+      '古代本草文献': 'https://www.zysj.com.cn/'
+    };
+
+    var relBadge = '';
+    if (item._relevance >= 20) relBadge = '<span style="display:inline-block; background:#ff8f00; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.7rem; margin-left:8px;">超高相关度</span>';
+    else if (item._relevance >= 10) relBadge = '<span style="display:inline-block; background:#1565c0; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.7rem; margin-left:8px;">高相关度</span>';
+    var dlName = item.title.replace(/[\\/:*?"<>|]/g, '_').substring(0,40);
+    var dlData = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(item, null, 2));
+    listHtml += '<div class="result-item" style="' + (item._relevance>=20 ? 'border-left-color:#ff8f00; background:#fff8e1;' : '') + '">' +
+      '<h4>' + title + relBadge + '</h4>' +
+      '<div class="source">来源：' + item.source + ' | 涉及食药物质：' + item.herbs.join('、') + ' | 类型：' + item.type + (item._relevance ? ' | 相关度分：' + item._relevance : '') + '</div>' +
+      '<p style="font-size:0.85rem; margin-top:6px;">' + desc + '</p>' +
+      transHtml +
+      '<div class="result-actions">' +
+        '<a class="btn btn-xs btn-light" href="' + (sourceLinks[item.source] || '#') + '" target="_blank">查看来源平台 →</a>' +
+        '<a class="btn btn-xs btn-secondary" href="' + dlData + '" download="' + dlName + '.json">下载该条数据</a>' +
+      '</div>' +
+    '</div>';
+  }
+  list.innerHTML = listHtml;
+
+  if (totalPages > 1) {
+    var pagHtml = '<button onclick="goMinePage(' + (minePage-1) + ', ' + totalPages + ')" ' + (minePage===1?'disabled':'') + '>上一页</button>';
+    for (var pj = 1; pj <= totalPages; pj++) {
+      if (pj===1 || pj===totalPages || Math.abs(pj-minePage)<=1) {
+        pagHtml += '<button class="' + (pj===minePage?'active':'') + '" onclick="goMinePage(' + pj + ', ' + totalPages + ')">' + pj + '</button>';
+      } else if (Math.abs(pj-minePage)===2) { pagHtml += '<span style="padding:8px 4px;">...</span>'; }
+    }
+    pagHtml += '<button onclick="goMinePage(' + (minePage+1) + ', ' + totalPages + ')" ' + (minePage===totalPages?'disabled':'') + '>下一页</button>';
+    pag.innerHTML = pagHtml;
+  } else {
+    pag.innerHTML = '';
+  }
+}
+
+function goMinePage(p, total) {
+  if (p < 1 || p > total) return;
+  minePage = p;
+  doSearch();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('mineSearch').addEventListener('keyup', function(e) { if(e.key==='Enter') { minePage=1; doSearch(); } });
+
+/* Module 4 */
+function loadFormula() {
+  var saved = localStorage.getItem('currentFormula');
+  if (!saved) return;
+  var formula = JSON.parse(saved);
+  document.getElementById('formulaName').textContent = formula.name;
+  var herbsHtml = '';
+  for (var i = 0; i < formula.herbs.length; i++) { herbsHtml += '<span class="formula-tag">' + formula.herbs[i] + '</span>'; }
+  document.getElementById('formulaHerbs').innerHTML = herbsHtml;
+  runPrediction(formula.herbs);
+}
+
+function runPrediction(herbs) {
+  var hash = herbs.join('').length;
+  var tasteVal = (6.5 + (hash%30)/10).toFixed(1);
+  var smellVal = (6.0 + ((hash*7)%25)/10).toFixed(1);
+  var colorVal = (7.0 + ((hash*3)%20)/10).toFixed(1);
+  var tLabels = ['偏苦微甘，回味悠长', '酸甜适口，清爽宜人', '甘淡平和，口感顺滑', '微辛开胃，风味独特'];
+  var sLabels = ['清香淡雅，草本芬芳', '浓郁醇厚，药香明显', '果香甜美，气味怡人', '淡香幽远，余韵绵长'];
+  var cLabels = ['浅黄透亮，色泽明快', '琥珀温润，观感醇厚', '淡绿清新，自然透亮', '棕红浓郁，色泽饱满'];
+
+  document.getElementById('tasteScore').textContent = tasteVal;
+  document.getElementById('tasteDesc').textContent = tLabels[hash % tLabels.length];
+  document.getElementById('smellScore').textContent = smellVal;
+  document.getElementById('smellDesc').textContent = sLabels[hash % sLabels.length];
+  document.getElementById('colorScore').textContent = colorVal;
+  document.getElementById('colorDesc').textContent = cLabels[hash % cLabels.length];
+
+  var bars = [
+    {label:'口感 (15%)', value:tasteVal*10, color:'#e65100'},
+    {label:'气味 (5%)', value:smellVal*10, color:'#2e7d32'},
+    {label:'颜色 (5%)', value:colorVal*10, color:'#1565c0'},
+    {label:'营养 (15%)', value:(75+(hash%20)), color:'#ff8f00'}
+  ];
+  var barsHtml = '';
+  for (var b = 0; b < bars.length; b++) {
+    barsHtml += '<div class="score-bar"><div class="label">' + bars[b].label + '</div><div class="bar-wrap"><div class="bar-fill" style="width:' + bars[b].value + '%; background:' + bars[b].color + ';"></div></div><div class="value">' + bars[b].value.toFixed(0) + '</div></div>';
+  }
+  document.getElementById('sensoryBars').innerHTML = barsHtml;
+
+  var nutriItems = [
+    {name:'蛋白质', amount:(8.2+(hash%50)/10).toFixed(1), rdi:'60g', pct:(12+hash%15)+'%', level:'良好'},
+    {name:'膳食纤维', amount:(12.5+(hash%80)/10).toFixed(1), rdi:'25g', pct:(45+hash%30)+'%', level:'优秀'},
+    {name:'维生素C', amount:(28+hash%40).toFixed(0), rdi:'100mg', pct:(25+hash%40)+'%', level:'良好'},
+    {name:'钾', amount:(320+hash%200).toFixed(0), rdi:'2000mg', pct:(15+hash%10)+'%', level:'一般'},
+    {name:'铁', amount:(4.5+(hash%30)/10).toFixed(1), rdi:'12mg', pct:(35+hash%20)+'%', level:'良好'},
+    {name:'锌', amount:(2.8+(hash%20)/10).toFixed(1), rdi:'12mg', pct:(20+hash%15)+'%', level:'一般'},
+    {name:'总多酚', amount:(850+hash%400).toFixed(0), rdi:'-', pct:'-', level:'优秀'},
+    {name:'总黄酮', amount:(420+hash%300).toFixed(0), rdi:'-', pct:'-', level:'优秀'}
+  ];
+  var nutriHtml = '';
+  for (var n = 0; n < nutriItems.length; n++) {
+    var nv = nutriItems[n];
+    var color = nv.level==='优秀' ? 'var(--success)' : (nv.level==='良好' ? 'var(--primary)' : 'var(--accent)');
+    nutriHtml += '<tr><td>' + nv.name + '</td><td>' + nv.amount + '</td><td>' + nv.rdi + '</td><td>' + nv.pct + '</td><td><span style="color:' + color + '; font-weight:600;">' + nv.level + '</span></td></tr>';
+  }
+  document.getElementById('nutriBody').innerHTML = nutriHtml;
+
+  var dosageMap = {'人参':'3g','黄芪':'10g','黄精':'10g','地黄':'10g','枸杞':'10g','肉苁蓉（荒漠）':'6g','山药':'15g','甘草':'3g','当归':'6g','山茱萸':'6g','杜仲叶':'10g','天麻':'3g','刺五加':'10g','淫羊藿':'6g','牛膝':'6g','山楂':'10g','桑叶':'6g','葛根':'10g','菊花':'6g','茯苓':'10g','薏苡仁':'15g','决明子':'10g','罗汉果':'1/2个','百合':'10g','陈皮':'6g','党参':'10g','西洋参':'3g','灵芝':'6g','酸枣仁':'10g','桃仁':'6g','荷叶':'6g','莱菔子':'10g','莲子':'10g','高良姜':'3g','淡竹叶':'6g','淡豆豉':'10g','菊苣':'10g','黄芥子':'3g','紫苏':'6g','紫苏籽':'10g','黑芝麻':'10g','黑胡椒':'1g','槐米':'6g','槐花':'6g','蒲公英':'10g','蜂蜜':'15g','榧子':'10g','鲜白茅根':'15g','鲜芦根':'15g','蝮蛇':'3g','橘皮':'6g','薄荷':'3g','薤白':'6g','覆盆子':'6g','藿香':'6g','山柰':'3g','西红花（藏红花）':'1g','草果':'3g','姜黄':'3g','荜茇':'3g','肉苁蓉（荒漠）':'6g','铁皮石斛':'6g','麦冬':'10g','天冬':'10g','化橘红':'6g','八角茴香':'3g','刀豆':'10g','小茴香':'3g','小蓟':'10g','马齿苋':'15g','乌梢蛇':'6g','乌梅':'6g','木瓜':'10g','火麻仁':'10g','代代花':'3g','玉竹':'10g','白芷':'3g','白果':'6g','白扁豆':'15g','白扁豆花':'6g','龙眼肉（桂圆）':'10g','百合':'10g','肉豆蔻':'3g','肉桂':'3g','余甘子':'6g','佛手':'6g','杏仁（甜、苦）':'6g','沙棘':'10g','牡蛎':'15g','芡实':'15g','花椒':'3g','赤小豆':'15g','阿胶':'6g','鸡内金':'3g','麦芽':'10g','昆布':'10g','枣（大枣、酸枣、黑枣）':'10g','郁李仁':'10g','金银花':'6g','青果':'6g','鱼腥草':'15g','姜（生姜、干姜）':'6g','枳椇子':'10g','栀子':'6g','砂仁':'3g','胖大海':'1枚','香橼':'6g','香薷':'6g','桔梗':'6g','益智仁':'6g','莲子':'10g','荷叶':'6g','莱菔子':'10g','高良姜':'3g','淡竹叶':'6g','淡豆豉':'10g','菊花':'6g','菊苣':'10g','黄芥子':'3g','黄精':'10g','紫苏':'6g','紫苏籽':'10g','葛根':'10g','黑芝麻':'10g','黑胡椒':'1g','槐米':'6g','槐花':'6g','蒲公英':'10g','蜂蜜':'15g','榧子':'10g','酸枣仁':'10g','鲜白茅根':'15g','鲜芦根':'15g','蝮蛇':'3g','橘皮':'6g','薄荷':'3g','薏苡仁':'15g','薤白':'6g','覆盆子':'6g','藿香':'6g','当归':'6g','山柰':'3g','西红花（藏红花）':'1g','草果':'3g','姜黄':'3g','荜茇':'3g','党参':'10g','肉苁蓉（荒漠）':'6g','铁皮石斛':'6g','西洋参':'3g','黄芪':'10g','灵芝':'6g','山茱萸':'6g','天麻':'3g','杜仲叶':'10g','地黄':'10g','麦冬':'10g','天冬':'10g','化橘红':'6g'};
+  var dosageText = herbs.map(function(h){ return h + ' ' + (dosageMap[h] || '适量'); }).join('、');
+  document.getElementById('dosageText').textContent = dosageText;
+}
+
+/* Init */
+renderM1();
+updateAuthUI();
+</script>
+</body>
+</html>

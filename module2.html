@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>功能食品组方设计 | 食药物质功能食品研发平台</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.radar-wrap { display: flex; justify-content: center; margin: 16px 0; }
+.radar-svg { max-width: 360px; width: 100%; }
+.scenario-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.tag { padding: 4px 10px; background: var(--primary-light); color: var(--primary-dark); border-radius: 20px; font-size: 0.8rem; cursor: pointer; border: 1px solid transparent; }
+.tag:hover, .tag.active { background: var(--primary); color: #fff; }
+.result-card { background: #f8f9fa; border-radius: var(--radius-sm); padding: 16px; margin-bottom: 12px; border-left: 4px solid var(--primary); }
+.result-card h4 { margin-bottom: 6px; color: var(--primary-dark); }
+.result-card .meta { font-size: 0.8rem; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="header-top">
+    <div class="brand">
+      <h1>食药物质功能食品研发平台</h1>
+      <span class="subtitle">Research and Development Platform for Functional Foods Derived from Food and Medicine Homology</span>
+    </div>
+    <div class="auth-buttons">
+      <button class="btn btn-outline btn-sm" onclick="alert('注册功能开发中')">注册</button>
+      <button class="btn btn-primary btn-sm" onclick="alert('登录功能开发中')">登录</button>
+    </div>
+  </div>
+  <nav class="nav-bar">
+    <ul>
+      <li><a href="index.html">首页</a></li>
+      <li><a href="module1.html">食药物质基本信息</a></li>
+      <li><a href="module2.html" class="active">功能食品组方设计</a></li>
+      <li><a href="module3.html">潜在应用数据挖掘</a></li>
+      <li><a href="module4.html">感官预测及营养评估</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- Main -->
+<main>
+  <h2 class="page-title"><span class="icon">⚗️</span>功能食品组方设计</h2>
+  <p class="page-desc">疾病输入 → 候选药味筛选 → 组方生成 → 九维加权评分 → Top10 推荐输出。评分体系涵盖疾病靶点覆盖率、网络拓扑、ADME、成分协同、安全性、口感、气味、颜色与营养。</p>
+
+  <div class="two-col">
+    <!-- Left: Input -->
+    <div>
+      <div class="panel">
+        <h3>1. 疾病输入</h3>
+        <div class="form-group">
+          <label>输入疾病名称或 ICD-11 编码</label>
+          <input type="text" id="diseaseInput" placeholder="例如：2型糖尿病、高血压、失眠...">
+        </div>
+        <div class="scenario-tags">
+          <span class="tag" onclick="setDisease('2型糖尿病')">2型糖尿病</span>
+          <span class="tag" onclick="setDisease('高血压')">高血压</span>
+          <span class="tag" onclick="setDisease('高脂血症')">高脂血症</span>
+          <span class="tag" onclick="setDisease('失眠')">失眠</span>
+          <span class="tag" onclick="setDisease('慢性胃炎')">慢性胃炎</span>
+          <span class="tag" onclick="setDisease('免疫力低下')">免疫力低下</span>
+        </div>
+        <button class="btn btn-primary w-full mt-3" onclick="generateFormula()">开始组方计算</button>
+      </div>
+
+      <div class="panel">
+        <h3>2. 虚拟筛选子模块（对标 TCMSP 9.0.1）</h3>
+        <div class="form-group">
+          <label>口服生物利用度 OB (%) ≥</label>
+          <input type="number" id="obVal" value="30">
+        </div>
+        <div class="form-group">
+          <label>类药性 DL ≥</label>
+          <input type="number" id="dlVal" value="0.18" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>肠胃吸收</label>
+          <select id="absorbSelect">
+            <option value="high">高</option>
+            <option value="middle">中</option>
+            <option value="low">低</option>
+          </select>
+        </div>
+        <button class="btn btn-secondary w-full" onclick="alert('虚拟筛选参数已设置，将在组方计算中自动应用')">应用筛选条件</button>
+      </div>
+    </div>
+
+    <!-- Right: Results -->
+    <div>
+      <div class="panel" id="scorePanel" style="display:none;">
+        <h3>3. 九维加权评分模型</h3>
+        <div id="scoreBars"></div>
+        <div class="radar-wrap">
+          <svg id="radarChart" class="radar-svg" viewBox="0 0 300 260"></svg>
+        </div>
+        <p class="text-center" style="font-size:0.85rem; color:var(--text-muted);">总评分 = Σ(各维度得分 × 权重)</p>
+      </div>
+
+      <div class="panel" id="top10Panel" style="display:none;">
+        <div class="flex justify-between items-center" style="margin-bottom:16px;">
+          <h3 style="margin:0; border:none; padding:0;">4. Top10 推荐组方</h3>
+          <a href="module4.html" class="btn btn-primary btn-sm">前往感官预测 →</a>
+        </div>
+        <div id="top10List"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h4>关于我们</h4>
+      <p>本平台由中国药科大学中药学院组分结构创新中药实验室研发。</p>
+    </div>
+    <div class="footer-section">
+      <h4>参考数据库</h4>
+      <p><a href="http://www.tcmip.cn/ETCM2/front/#/" target="_blank">ETCM 2.0</a></p>
+      <p><a href="http://herb.ac.cn/" target="_blank">HERB</a></p>
+    </div>
+    <div class="footer-section">
+      <h4>联系我们</h4>
+      <p>中国药科大学中药学院</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2026 食药物质功能食品研发平台 | 中国药科大学中药学院组分结构创新中药实验室
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+const weights = [
+  { label: '疾病靶点覆盖率', w: 0.20, key: 'coverage' },
+  { label: '网络拓扑重要性', w: 0.08, key: 'network' },
+  { label: 'ADME 成药性', w: 0.15, key: 'adme' },
+  { label: '成分协同性', w: 0.10, key: 'synergy' },
+  { label: '安全性与配伍禁忌', w: 0.07, key: 'safety' },
+  { label: '口感', w: 0.15, key: 'taste' },
+  { label: '气味', w: 0.05, key: 'smell' },
+  { label: '颜色', w: 0.05, key: 'color' },
+  { label: '营养', w: 0.15, key: 'nutrition' }
+];
+
+function setDisease(name) {
+  document.getElementById('diseaseInput').value = name;
+}
+
+function generateFormula() {
+  const disease = document.getElementById('diseaseInput').value.trim();
+  if (!disease) { alert('请先输入疾病名称'); return; }
+
+  // Simulate scores
+  const scores = weights.map(w => ({
+    ...w,
+    raw: Math.round(60 + Math.random() * 35),
+    weighted: 0
+  }));
+  scores.forEach(s => s.weighted = +(s.raw * s.w).toFixed(1));
+  const total = scores.reduce((a, b) => a + b.weighted, 0).toFixed(1);
+
+  // Render score bars
+  const barsHtml = scores.map(s => `
+    <div class="score-bar">
+      <div class="label">${s.label}</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${s.raw}%"></div></div>
+      <div class="value">${s.raw}</div>
+    </div>
+  `).join('') + `
+    <div class="score-bar" style="margin-top:12px; border-top:1px solid var(--border); padding-top:12px;">
+      <div class="label" style="font-weight:700;">总评分</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${Math.min(total,100)}%; background:linear-gradient(90deg, var(--accent), #e65100);"></div></div>
+      <div class="value" style="color:var(--accent);">${total}</div>
+    </div>
+  `;
+  document.getElementById('scoreBars').innerHTML = barsHtml;
+  document.getElementById('scorePanel').style.display = 'block';
+
+  // Draw radar
+  drawRadar(scores);
+
+  // Generate Top10 mock results
+  const herbs = ['黄芪','枸杞','山楂','桑叶','葛根','甘草','菊花','茯苓','薏苡仁','当归','山药','决明子','罗汉果','百合','陈皮'];
+  const results = [];
+  for (let i = 0; i < 10; i++) {
+    const combo = [];
+    const count = 3 + Math.floor(Math.random() * 4);
+    const pool = [...herbs].sort(() => Math.random() - 0.5);
+    for (let j = 0; j < count; j++) combo.push(pool[j]);
+    results.push({
+      rank: i + 1,
+      name: `组方 ${String(i+1).padStart(2,'0')}号`,
+      herbs: combo,
+      score: (85 - i * 2.5 + Math.random() * 2).toFixed(1)
+    });
+  }
+
+  const topHtml = results.map(r => `
+    <div class="result-card">
+      <div class="flex justify-between items-center">
+        <h4>#${r.rank} ${r.name}</h4>
+        <span style="font-size:1.2rem; font-weight:700; color:var(--accent);">${r.score} 分</span>
+      </div>
+      <div class="meta">组成：${r.herbs.join('、')}</div>
+      <div style="margin-top:8px;">
+        <button class="btn btn-sm btn-light" onclick="saveFormula('${r.name}', '${r.herbs.join(',')}')">保存组方</button>
+        <a href="module4.html?formula=${encodeURIComponent(r.name)}&herbs=${encodeURIComponent(r.herbs.join(','))}" class="btn btn-sm btn-primary" style="margin-left:8px;">感官预测</a>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('top10List').innerHTML = topHtml;
+  document.getElementById('top10Panel').style.display = 'block';
+
+  window.scrollTo({ top: document.getElementById('scorePanel').offsetTop - 80, behavior: 'smooth' });
+}
+
+function drawRadar(scores) {
+  const svg = document.getElementById('radarChart');
+  const cx = 150, cy = 130, r = 90;
+  const n = scores.length;
+  const angle = i => (Math.PI * 2 * i / n) - Math.PI / 2;
+
+  // Background grid
+  let grid = '';
+  for (let level = 1; level <= 5; level++) {
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const a = angle(i);
+      pts.push(`${cx + r * (level/5) * Math.cos(a)},${cy + r * (level/5) * Math.sin(a)}`);
+    }
+    grid += `<polygon points="${pts.join(' ')}" fill="none" stroke="#e0e0e0" stroke-width="1"/>`;
+  }
+  // Axis lines
+  for (let i = 0; i < n; i++) {
+    const a = angle(i);
+    grid += `<line x1="${cx}" y1="${cy}" x2="${cx + r * Math.cos(a)}" y2="${cy + r * Math.sin(a)}" stroke="#e0e0e0" stroke-width="1"/>`;
+  }
+
+  // Data polygon
+  const dataPts = scores.map((s, i) => {
+    const a = angle(i);
+    const rr = r * (s.raw / 100);
+    return `${cx + rr * Math.cos(a)},${cy + rr * Math.sin(a)}`;
+  });
+  const poly = `<polygon points="${dataPts.join(' ')}" fill="rgba(21,101,192,0.2)" stroke="var(--primary)" stroke-width="2"/>`;
+
+  // Labels
+  const labels = scores.map((s, i) => {
+    const a = angle(i);
+    const lx = cx + (r + 22) * Math.cos(a);
+    const ly = cy + (r + 22) * Math.sin(a);
+    return `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#555">${s.label}</text>`;
+  }).join('');
+
+  svg.innerHTML = grid + poly + labels;
+}
+
+function saveFormula(name, herbs) {
+  localStorage.setItem('currentFormula', JSON.stringify({ name, herbs: herbs.split(','), time: new Date().toISOString() }));
+  alert(`已保存组方：${name}`);
+}
+</script>
+</body>
+</html>

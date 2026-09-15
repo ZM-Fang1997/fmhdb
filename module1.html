@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>食药物质基本信息 | 食药物质功能食品研发平台</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="header-top">
+    <div class="brand">
+      <h1>食药物质功能食品研发平台</h1>
+      <span class="subtitle">Research and Development Platform for Functional Foods Derived from Food and Medicine Homology</span>
+    </div>
+    <div class="auth-buttons">
+      <button class="btn btn-outline btn-sm" onclick="alert('注册功能开发中')">注册</button>
+      <button class="btn btn-primary btn-sm" onclick="alert('登录功能开发中')">登录</button>
+    </div>
+  </div>
+  <nav class="nav-bar">
+    <ul>
+      <li><a href="index.html">首页</a></li>
+      <li><a href="module1.html" class="active">食药物质基本信息</a></li>
+      <li><a href="module2.html">功能食品组方设计</a></li>
+      <li><a href="module3.html">潜在应用数据挖掘</a></li>
+      <li><a href="module4.html">感官预测及营养评估</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- Main -->
+<main>
+  <h2 class="page-title"><span class="icon">📖</span>食药物质基本信息</h2>
+  <p class="page-desc">收录国家106种食药物质目录品种，提供图文展示与详细信息查询。点击图片或名称可查看对应食药物质的完整数据库信息。</p>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="搜索食药物质名称...">
+    <button class="btn btn-primary" onclick="filterSubstances()">搜索</button>
+    <button class="btn btn-light" onclick="clearFilter()">重置</button>
+  </div>
+
+  <div id="substanceGrid" class="substance-grid"></div>
+
+  <div id="pagination" class="pagination"></div>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; max-width:600px; width:90%; max-height:80vh; overflow:auto; padding:24px; position:relative;">
+      <button onclick="closeModal()" style="position:absolute; top:12px; right:16px; font-size:1.5rem; background:none; border:none; cursor:pointer;">×</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h4>关于我们</h4>
+      <p>本平台由中国药科大学中药学院组分结构创新中药实验室研发，致力于食药物质功能食品的科学化、系统化开发。</p>
+    </div>
+    <div class="footer-section">
+      <h4>参考数据库</h4>
+      <p><a href="http://www.tcmip.cn/ETCM2/front/#/" target="_blank">ETCM 2.0</a></p>
+      <p><a href="http://herb.ac.cn/" target="_blank">HERB</a></p>
+    </div>
+    <div class="footer-section">
+      <h4>联系我们</h4>
+      <p>中国药科大学中药学院</p>
+      <p>南京市江宁区龙眠大道639号</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2026 食药物质功能食品研发平台 | 中国药科大学中药学院组分结构创新中药实验室
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+let substances = [];
+let filtered = [];
+let currentPage = 1;
+const pageSize = 12;
+
+fetch('data/substances.json')
+  .then(r => r.json())
+  .then(data => {
+    substances = data;
+    filtered = [...substances];
+    render();
+  });
+
+function render() {
+  const grid = document.getElementById('substanceGrid');
+  const start = (currentPage - 1) * pageSize;
+  const pageItems = filtered.slice(start, start + pageSize);
+
+  grid.innerHTML = pageItems.map(s => `
+    <div class="substance-card" onclick="openDetail('${s.name}')">
+      <img src="${s.image}" alt="${s.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22140%22><rect fill=%22%23e3f2fd%22 width=%22100%22 height=%22140%22/><text x=%2250%22 y=%2275%22 text-anchor=%22middle%22 fill=%22%231565c0%22>${s.name}</text></svg>'">
+      <div class="name">${s.name}</div>
+    </div>
+  `).join('');
+
+  renderPagination();
+}
+
+function renderPagination() {
+  const total = Math.ceil(filtered.length / pageSize);
+  const pag = document.getElementById('pagination');
+  let html = `
+    <button onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>上一页</button>
+  `;
+  for (let i = 1; i <= total; i++) {
+    if (i === 1 || i === total || Math.abs(i - currentPage) <= 2) {
+      html += `<button class="${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+    } else if (Math.abs(i - currentPage) === 3) {
+      html += `<span style="padding:8px;">...</span>`;
+    }
+  }
+  html += `<button onclick="goPage(${currentPage+1})" ${currentPage===total?'disabled':''}>下一页</button>`;
+  pag.innerHTML = html;
+}
+
+function goPage(p) {
+  const total = Math.ceil(filtered.length / pageSize);
+  if (p < 1 || p > total) return;
+  currentPage = p;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function filterSubstances() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) { filtered = [...substances]; }
+  else {
+    filtered = substances.filter(s => s.name.includes(q));
+  }
+  currentPage = 1;
+  render();
+}
+
+function clearFilter() {
+  document.getElementById('searchInput').value = '';
+  filtered = [...substances];
+  currentPage = 1;
+  render();
+}
+
+document.getElementById('searchInput').addEventListener('keyup', e => {
+  if (e.key === 'Enter') filterSubstances();
+});
+
+function openDetail(name) {
+  const modal = document.getElementById('detailModal');
+  const content = document.getElementById('modalContent');
+  const s = substances.find(x => x.name === name);
+  content.innerHTML = `
+    <h2 style="color:var(--primary-dark); margin-bottom:16px;">${s.name}</h2>
+    <img src="${s.image}" style="width:100%; max-width:300px; border-radius:8px; display:block; margin:0 auto 16px;">
+    <div class="panel" style="margin-bottom:0;">
+      <p><strong>名称：</strong>${s.name}</p>
+      <p><strong>数据来源：</strong>食药物质数据库-106种-完整版.xlsx</p>
+      <p style="color:var(--text-muted); margin-top:12px;">详细信息页面开发中，后续将展示完整的成分、靶点、ADME、性味归经等数据。</p>
+      <a href="module2.html" class="btn btn-primary" style="margin-top:12px; display:inline-block;">前往组方设计 →</a>
+    </div>
+  `;
+  modal.style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('detailModal').style.display = 'none';
+}
+
+document.getElementById('detailModal').addEventListener('click', e => {
+  if (e.target.id === 'detailModal') closeModal();
+});
+</script>
+</body>
+</html>

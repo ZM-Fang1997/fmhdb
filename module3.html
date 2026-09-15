@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>潜在应用数据挖掘 | 食药物质功能食品研发平台</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.mining-layout { display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
+.filter-group { margin-bottom: 20px; }
+.filter-group h4 { font-size: 0.9rem; color: var(--primary-dark); margin-bottom: 10px; }
+.filter-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; cursor: pointer; }
+.filter-group input[type="checkbox"] { margin-right: 6px; }
+.result-item { background: var(--card-bg); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); border-left: 4px solid var(--secondary); transition: all 0.2s; }
+.result-item:hover { transform: translateX(4px); }
+.result-item h4 { color: var(--primary-dark); margin-bottom: 6px; }
+.result-item .source { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+.result-item .highlight { background: #fff3cd; padding: 0 2px; border-radius: 3px; }
+.result-meta { display: flex; gap: 16px; font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; }
+@media (max-width: 900px) { .mining-layout { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="header-top">
+    <div class="brand">
+      <h1>食药物质功能食品研发平台</h1>
+      <span class="subtitle">Research and Development Platform for Functional Foods Derived from Food and Medicine Homology</span>
+    </div>
+    <div class="auth-buttons">
+      <button class="btn btn-outline btn-sm" onclick="alert('注册功能开发中')">注册</button>
+      <button class="btn btn-primary btn-sm" onclick="alert('登录功能开发中')">登录</button>
+    </div>
+  </div>
+  <nav class="nav-bar">
+    <ul>
+      <li><a href="index.html">首页</a></li>
+      <li><a href="module1.html">食药物质基本信息</a></li>
+      <li><a href="module2.html">功能食品组方设计</a></li>
+      <li><a href="module3.html" class="active">潜在应用数据挖掘</a></li>
+      <li><a href="module4.html">感官预测及营养评估</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- Main -->
+<main>
+  <h2 class="page-title"><span class="icon">🔍</span>潜在应用数据挖掘</h2>
+  <p class="page-desc">基于古今中外文献与实验数据，对106种食药物质的价值进行深度挖掘。内置模糊检索，支持多维度知识发现与关联分析。</p>
+
+  <div class="search-box" style="max-width: 100%;">
+    <input type="text" id="mineSearch" placeholder="输入关键词进行模糊检索，例如：抗氧化、降血糖、免疫调节、黄酮..." style="flex: 1;">
+    <button class="btn btn-primary" onclick="doSearch()">搜索</button>
+    <button class="btn btn-light" onclick="clearSearch()">重置</button>
+  </div>
+
+  <div class="mining-layout">
+    <!-- Sidebar Filters -->
+    <aside>
+      <div class="panel" style="position: sticky; top: 120px;">
+        <h3>筛选条件</h3>
+        <div class="filter-group">
+          <h4>数据来源</h4>
+          <label><input type="checkbox" checked value="ancient">古代本草文献</label>
+          <label><input type="checkbox" checked value="modern">现代药理学研究</label>
+          <label><input type="checkbox" checked value="clinical">临床研究</label>
+          <label><input type="checkbox" checked value="network">网络药理学预测</label>
+        </div>
+        <div class="filter-group">
+          <h4>功效类别</h4>
+          <label><input type="checkbox" checked value="metabolic">代谢调节</label>
+          <label><input type="checkbox" checked value="immune">免疫调节</label>
+          <label><input type="checkbox" checked value="antioxidant">抗氧化</label>
+          <label><input type="checkbox" checked value="digestive">消化系统</label>
+          <label><input type="checkbox" checked value="cardio">心血管保护</label>
+          <label><input type="checkbox" checked value="neuro">神经保护</label>
+        </div>
+        <div class="filter-group">
+          <h4>成分类型</h4>
+          <label><input type="checkbox" checked value="flavonoid">黄酮类</label>
+          <label><input type="checkbox" checked value="polyphenol">多酚类</label>
+          <label><input type="checkbox" checked value="saponin">皂苷类</label>
+          <label><input type="checkbox" checked value="terpene">萜类</label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Results -->
+    <div>
+      <div id="resultsHeader" style="margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">请输入关键词开始检索...</div>
+      <div id="resultsList"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h4>关于我们</h4>
+      <p>本平台由中国药科大学中药学院组分结构创新中药实验室研发。</p>
+    </div>
+    <div class="footer-section">
+      <h4>参考数据库</h4>
+      <p><a href="http://www.tcmip.cn/ETCM2/front/#/" target="_blank">ETCM 2.0</a></p>
+      <p><a href="http://herb.ac.cn/" target="_blank">HERB</a></p>
+    </div>
+    <div class="footer-section">
+      <h4>联系我们</h4>
+      <p>中国药科大学中药学院</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2026 食药物质功能食品研发平台 | 中国药科大学中药学院组分结构创新中药实验室
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+const mockData = [
+  { title: '黄芪多糖的免疫调节作用', source: '现代药理学研究', category: 'immune', type: 'polysaccharide', herbs: ['黄芪'], desc: '黄芪多糖可显著增强巨噬细胞吞噬功能，促进T/B淋巴细胞增殖，提高机体非特异性免疫与特异性免疫应答能力。' },
+  { title: '山楂黄酮降血脂机制', source: '临床研究', category: 'cardio', type: 'flavonoid', herbs: ['山楂'], desc: '山楂总黄酮通过抑制HMG-CoA还原酶活性，促进胆固醇逆向转运，显著降低血清总胆固醇与低密度脂蛋白水平。' },
+  { title: '枸杞多糖抗氧化与抗衰老', source: '网络药理学预测', category: 'antioxidant', type: 'polysaccharide', herbs: ['枸杞子'], desc: '枸杞多糖通过激活Nrf2/ARE信号通路，上调SOD、CAT、GSH-Px等抗氧化酶表达，清除自由基，延缓细胞衰老。' },
+  { title: '桑叶生物碱降血糖作用', source: '现代药理学研究', category: 'metabolic', type: 'alkaloid', herbs: ['桑叶'], desc: '1-脱氧野尻霉素（DNJ）作为α-糖苷酶竞争性抑制剂，延缓肠道碳水化合物吸收，具有显著的餐后血糖调控作用。' },
+  { title: '葛根异黄酮心血管保护', source: '临床研究', category: 'cardio', type: 'flavonoid', herbs: ['葛根'], desc: '葛根素通过扩张冠状动脉、改善微循环、抑制血小板聚集，对心肌缺血再灌注损伤具有保护作用。' },
+  { title: '甘草皂苷抗炎机制', source: '古代本草文献', category: 'immune', type: 'saponin', herbs: ['甘草'], desc: '甘草酸及其苷元通过抑制NF-κB和MAPK信号通路，下调促炎因子TNF-α、IL-6、IL-1β表达，发挥广谱抗炎活性。' },
+  { title: '菊花挥发油神经保护', source: '现代药理学研究', category: 'neuro', type: 'terpene', herbs: ['菊花'], desc: '菊花挥发油中的樟脑、龙脑等成分可透过血脑屏障，抑制乙酰胆碱酯酶活性，改善阿尔茨海默病模型小鼠认知功能。' },
+  { title: '茯苓三萜利尿与镇静', source: '古代本草文献', category: 'digestive', type: 'terpene', herbs: ['茯苓'], desc: '茯苓利水渗湿、健脾宁心。现代研究证实茯苓三萜类成分具有明确的利尿作用，同时可调节GABA受体发挥镇静安神效果。' },
+  { title: '薏苡仁酯抗肿瘤活性', source: '网络药理学预测', category: 'immune', type: 'lipid', herbs: ['薏苡仁'], desc: '薏苡仁酯通过诱导肿瘤细胞凋亡、抑制血管生成、调节机体免疫功能等多重机制发挥抗肿瘤辅助作用。' },
+  { title: '当归挥发油促进造血', source: '现代药理学研究', category: 'metabolic', type: 'terpene', herbs: ['当归'], desc: '当归挥发油可刺激骨髓造血干/祖细胞增殖分化，上调EPO表达，对化疗所致骨髓抑制具有改善作用。' },
+  { title: '罗汉果甜苷代谢调节', source: '临床研究', category: 'metabolic', type: 'saponin', herbs: ['罗汉果'], desc: '罗汉果甜苷V作为天然非糖甜味剂，不参与糖代谢，适合糖尿病人群，同时具有抗氧化与免疫调节活性。' },
+  { title: '决明子蒽醌通便明目', source: '古代本草文献', category: 'digestive', type: 'anthraquinone', herbs: ['决明子'], desc: '决明子大黄酚、决明素等蒽醌类成分刺激肠壁蠕动，促进排便；同时通过抗氧化机制保护视网膜光感受器细胞。' },
+  { title: '金银花绿原酸抗病毒', source: '现代药理学研究', category: 'immune', type: 'polyphenol', herbs: ['金银花'], desc: '绿原酸通过抑制病毒神经氨酸酶活性、调节宿主免疫应答，对流感病毒、呼吸道合胞病毒等具有抑制作用。' },
+  { title: '铁皮石斛多糖肠胃保护', source: '临床研究', category: 'digestive', type: 'polysaccharide', herbs: ['铁皮石斛'], desc: '铁皮石斛多糖可促进胃黏膜修复，增加胃黏液分泌，抑制幽门螺杆菌黏附，对慢性胃炎具有辅助治疗价值。' },
+  { title: '黄精皂苷抗疲劳作用', source: '网络药理学预测', category: 'metabolic', type: 'saponin', herbs: ['黄精'], desc: '黄精皂苷通过提高线粒体功能、增加肌糖原储备、降低血乳酸与血尿素氮水平，发挥抗运动性疲劳作用。' }
+];
+
+function doSearch() {
+  const q = document.getElementById('mineSearch').value.trim().toLowerCase();
+  if (!q) { alert('请输入检索关键词'); return; }
+
+  // Simple fuzzy match
+  const results = mockData.filter(item => {
+    const text = (item.title + item.desc + item.herbs.join('') + item.type).toLowerCase();
+    return text.includes(q);
+  });
+
+  renderResults(results, q);
+}
+
+function clearSearch() {
+  document.getElementById('mineSearch').value = '';
+  document.getElementById('resultsList').innerHTML = '';
+  document.getElementById('resultsHeader').textContent = '请输入关键词开始检索...';
+}
+
+function renderResults(results, q) {
+  const header = document.getElementById('resultsHeader');
+  const list = document.getElementById('resultsList');
+
+  if (results.length === 0) {
+    header.textContent = `未找到与 "${q}" 相关的结果`;
+    list.innerHTML = '<div class="panel" style="text-align:center; color:var(--text-muted);">请尝试更换关键词，如：抗氧化、降血糖、黄芪、黄酮...</div>';
+    return;
+  }
+
+  header.textContent = `检索 "${q}" 共找到 ${results.length} 条结果`;
+
+  const re = new RegExp(`(${q})`, 'gi');
+  list.innerHTML = results.map(item => {
+    const title = item.title.replace(re, '<span class="highlight">$1</span>');
+    const desc = item.desc.replace(re, '<span class="highlight">$1</span>');
+    return `
+      <div class="result-item">
+        <h4>${title}</h4>
+        <div class="source">来源：${item.source} | 涉及食药物质：${item.herbs.join('、')} | 成分类型：${item.type}</div>
+        <p>${desc}</p>
+        <div class="result-meta">
+          <span>功效类别：${item.category}</span>
+          <span><a href="module1.html">查看物质详情 →</a></span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('mineSearch').addEventListener('keyup', e => {
+  if (e.key === 'Enter') doSearch();
+});
+</script>
+</body>
+</html>
